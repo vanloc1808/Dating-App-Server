@@ -1,1 +1,4 @@
 venv/
+api/__pycache__/
+dating_app/__pycache__/
+api/migrations/__pycache__/

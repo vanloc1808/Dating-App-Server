@@ -18,25 +18,18 @@ class UserRegisterView(APIView):
     def post(self, request):
         request_data = request.data
 
-        print(request_data)
-
         email = request_data.get('email')
-        #print("Email", email)
         name = request_data.get('name')
         password = request_data.get('password')
         phone_number = request_data.get('phone_number')
-        #print(len(password))
 
         if email is None or name is None or password is None or phone_number is None:
-            print("Missing fields")
             return JsonResponse({'message': 'Missing fields'}, status=status.HTTP_400_BAD_REQUEST)
         
         if User.objects.filter(email=email).exists():
-            print("Email already exists")
             return JsonResponse({'message': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
         
         if User.objects.filter(phone_number=phone_number).exists():
-            print("Phone number already exists")
             return JsonResponse({'message': 'Phone number already exists'}, status=status.HTTP_400_BAD_REQUEST)
         
         # get the hash value of email using SHA256
@@ -65,3 +58,22 @@ class UserRegisterView(APIView):
         print(serializer.errors)
 
         return JsonResponse({'message': 'Something went wrong'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UserLoginView(APIView):
+    def post(self, request):
+        request_data = request.data
+
+        hash_email = request_data.get('hash_email')
+        password = request_data.get('password')
+
+        if hash_email is None or password is None:
+            return JsonResponse({'message': 'Missing fields'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not User.objects.filter(hash_email=hash_email).exists():
+            return JsonResponse({'message': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = User.objects.get(hash_email=hash_email)
+        if not user.password == password:
+            return JsonResponse({'message': 'Wrong password'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({'message': 'successful'}, status=status.HTTP_200_OK)

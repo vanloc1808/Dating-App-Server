@@ -9,6 +9,7 @@ source venv/bin/activate
 # django-admin startproject proj .
 # django-admin startapp dating_app
 # pip install django-tastypie
-# python3 manage.py migrate
+python3 manage.py makemigrations
+python3 manage.py migrate
 
 python3 manage.py runserver

@@ -18,18 +18,26 @@ class UserRegisterView(APIView):
     def post(self, request):
         request_data = request.data
 
+        print(request_data)
+
         email = request_data.get('email')
-        print("Email", email)
+        #print("Email", email)
         name = request_data.get('name')
         password = request_data.get('password')
         phone_number = request_data.get('phone_number')
-        print(len(password))
+        #print(len(password))
 
         if email is None or name is None or password is None or phone_number is None:
+            print("Missing fields")
             return JsonResponse({'message': 'Missing fields'}, status=status.HTTP_400_BAD_REQUEST)
         
         if User.objects.filter(email=email).exists():
+            print("Email already exists")
             return JsonResponse({'message': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if User.objects.filter(phone_number=phone_number).exists():
+            print("Phone number already exists")
+            return JsonResponse({'message': 'Phone number already exists'}, status=status.HTTP_400_BAD_REQUEST)
         
         # get the hash value of email using SHA256
         hash = sha256(email.encode('utf-8')).hexdigest()
@@ -42,11 +50,17 @@ class UserRegisterView(APIView):
             "phone_number": phone_number
         }
 
+        answer_data_dict = {
+            "hash_email": hash
+        }
+
+        print(data_dict)
+
         serializer = UserSerializer(data=data_dict)
         if serializer.is_valid():
             serializer.save()
 
-            return JsonResponse({'message': 'successful', 'data': data_dict}, status=status.HTTP_201_CREATED)
+            return JsonResponse({'message': 'successful', 'data': answer_data_dict}, status=status.HTTP_201_CREATED)
         
         print(serializer.errors)
 

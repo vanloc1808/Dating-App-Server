@@ -47,8 +47,6 @@ class UserRegisterView(APIView):
             "hash_email": hash
         }
 
-        print(data_dict)
-
         serializer = UserSerializer(data=data_dict)
         if serializer.is_valid():
             serializer.save()

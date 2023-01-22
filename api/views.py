@@ -13,6 +13,10 @@ from api.serializers import UserSerializer
 from hashlib import sha256
 from rest_framework.views import APIView
 
+from datetime import datetime
+from api.utils import prime_number
+from api.mail_handlers import forgot_password
+
 # Create your views here.
 class UserRegisterView(APIView):
     def post(self, request):
@@ -75,3 +79,37 @@ class UserLoginView(APIView):
             return JsonResponse({'message': 'Wrong password'}, status=status.HTTP_400_BAD_REQUEST)
         
         return JsonResponse({'message': 'successful'}, status=status.HTTP_200_OK)
+
+class UserPasswordForgotView(APIView):
+    def post(self, request):
+        request_data = request.data
+
+        hash_email = request_data.get('hash_email')
+
+        if hash_email is None:
+            return JsonResponse({'message': 'Missing fields'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = User.objects.get(hash_email=hash_email)
+        # if user not exists
+        if user is None:
+            return JsonResponse({'message': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # get the current date
+        current_date = datetime.now()
+        product1 = current_date.month * current_date.day * current_date.hour * current_date.minute
+        product2 = current_date.year * current_date.second
+
+        min_operand = min(product1, product2)
+        max_operand = max(product1, product2)
+
+        prime_list = prime_number.get_two_random_primes(min_operand, max_operand)
+        
+        recovery_key = (prime_list[0] * prime_list[1]) % (10 ** 6)
+
+        str_recovery_key = str(recovery_key).zfill(6)
+
+        forgot_password.send_password_recovery_mail(user.email, str_recovery_key)
+
+        sha256_recovery_key = sha256(str_recovery_key.encode('utf-8')).hexdigest()
+
+        return JsonResponse({'message': 'successful', 'data': {'sha256_recovery_key': sha256_recovery_key}}, status=status.HTTP_200_OK)

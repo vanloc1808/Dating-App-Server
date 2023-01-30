@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 
-
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 
@@ -80,6 +79,13 @@ class UserLoginView(APIView):
         
         return JsonResponse({'message': 'successful'}, status=status.HTTP_200_OK)
 
+"""
+    Password recovery code gotten by:
+    a = month * day * hour * minute
+    b = year * second
+    min(a, b) <= p1, p2 <= max(a, b) with p1, p2 prime number
+    recovery_key = (p1 * p2) % (10 ** 6)
+"""
 class UserPasswordForgotView(APIView):
     def post(self, request):
         request_data = request.data

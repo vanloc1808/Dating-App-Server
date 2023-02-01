@@ -2,8 +2,8 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-SENDER_ADDRESS = 'datingappjan2023@gmail.com'
-SENDER_PASSWORD = 'xyazdnpzwywjxpux'
+SENDER_ADDRESS = ''
+SENDER_PASSWORD = ''
 
 def send_password_recovery_mail(receiver_email, recovery_key):
     subject = 'Password recovery email'
